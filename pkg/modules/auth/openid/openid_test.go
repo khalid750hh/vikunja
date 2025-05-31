@@ -38,7 +38,14 @@ func TestGetOrCreateUser(t *testing.T) {
 			Email:             "test@example.com",
 			PreferredUsername: "someUserWhoDoesNotExistYet",
 		}
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.issuer", Subject: "12345"}
 
 		u, err := getOrCreateUser(s, cl, provider, idToken)
@@ -61,7 +68,14 @@ func TestGetOrCreateUser(t *testing.T) {
 			Email:             "test@example.com",
 			PreferredUsername: "",
 		}
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.issuer", Subject: "12345"}
 
 		u, err := getOrCreateUser(s, cl, provider, idToken)
@@ -83,7 +97,14 @@ func TestGetOrCreateUser(t *testing.T) {
 		cl := &claims{
 			Email: "",
 		}
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.issuer", Subject: "12345"}
 
 		_, err := getOrCreateUser(s, cl, provider, idToken)
@@ -97,7 +118,14 @@ func TestGetOrCreateUser(t *testing.T) {
 		cl := &claims{
 			Email: "other-email-address@some.service.com",
 		}
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.service.com", Subject: "12345"}
 
 		u, err := getOrCreateUser(s, cl, provider, idToken)
@@ -124,7 +152,14 @@ func TestGetOrCreateUser(t *testing.T) {
 			},
 		}
 
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.service.com", Subject: "12345"}
 
 		u, err := getOrCreateUser(s, cl, provider, idToken)
@@ -161,7 +196,14 @@ func TestGetOrCreateUser(t *testing.T) {
 			},
 		}
 
-		provider := &Provider{}
+		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
+		}
 		idToken := &oidc.IDToken{Issuer: "https://some.service.com", Subject: "12345"}
 
 		u, err := getOrCreateUser(s, cl, provider, idToken)
@@ -240,6 +282,12 @@ func TestGetOrCreateUser(t *testing.T) {
 
 		cl := &claims{}
 		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
 			UsernameFallback: true,
 		}
 		idToken := &oidc.IDToken{Issuer: "https://some.issuer", Subject: "user11"}
@@ -259,6 +307,12 @@ func TestGetOrCreateUser(t *testing.T) {
 			Email: "user11@example.com",
 		}
 		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
 			EmailFallback: true,
 		}
 		idToken := &oidc.IDToken{Issuer: "https://some.issuer", Subject: "user11"}
@@ -279,6 +333,12 @@ func TestGetOrCreateUser(t *testing.T) {
 			Email: "user11@example.com",
 		}
 		provider := &Provider{
+			Name: "Test Provider",
+			Key: "default",
+			AuthURL: "https://test.example.com",
+			OriginalAuthURL: "https://test.example.com",
+			ClientID: "test-client",
+			ClientSecret: "test-secret",
 			UsernameFallback: true,
 			EmailFallback:    true,
 		}

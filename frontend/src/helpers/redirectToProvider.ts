@@ -6,11 +6,10 @@ export function getRedirectUrlFromCurrentFrontendPath(provider: IProvider): stri
 	// We're not using the redirect url provided by the server to allow redirects when using the electron app.
 	// The implications are not quite clear yet hence the logic to pass in another redirect url still exists.
 	const url = parseURL(window.location.href)
-	return `${url.protocol}//${url.host}/auth/openid/${provider.key}`
+	return `${url.protocol}//${url.host}/auth/openid/default`
 }
 
 export const redirectToProvider = (provider: IProvider) => {
-
 	const redirectUrl = getRedirectUrlFromCurrentFrontendPath(provider)
 	const state = createRandomID(24)
 	localStorage.setItem('state', state)

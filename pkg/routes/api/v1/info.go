@@ -20,9 +20,7 @@ import (
 	"net/http"
 
 	"code.vikunja.io/api/pkg/config"
-	"code.vikunja.io/api/pkg/log"
-	"code.vikunja.io/api/pkg/modules/auth/openid"
-	microsofttodo "code.vikunja.io/api/pkg/modules/migration/microsoft-todo"
+	"code.vikunja.io/api/pkg/modules/migration/microsoft-todo"
 	"code.vikunja.io/api/pkg/modules/migration/ticktick"
 	"code.vikunja.io/api/pkg/modules/migration/todoist"
 	"code.vikunja.io/api/pkg/modules/migration/trello"
@@ -69,8 +67,16 @@ type ldapAuthInfo struct {
 }
 
 type openIDAuthInfo struct {
-	Enabled   bool               `json:"enabled"`
-	Providers []*openid.Provider `json:"providers"`
+	Enabled   bool            `json:"enabled"`
+	Provider  openIDProviderInfo `json:"provider"`
+}
+
+type openIDProviderInfo struct {
+	Name      string `json:"name"`
+	AuthURL   string `json:"auth_url"`
+	LogoutURL string `json:"logout_url"`
+	ClientID  string `json:"client_id"`
+	Scope     string `json:"scope"`
 }
 
 type legalInfo struct {
@@ -119,17 +125,16 @@ func Info(c echo.Context) error {
 			},
 			OpenIDConnect: openIDAuthInfo{
 				Enabled: config.AuthOpenIDEnabled.GetBool(),
+				Provider: openIDProviderInfo{
+					Name: config.AuthOpenIDName.GetString(),
+					AuthURL: config.AuthOpenIDAuthURL.GetString(),
+					LogoutURL: config.AuthOpenIDLogoutURL.GetString(),
+					ClientID: config.AuthOpenIDClientID.GetString(),
+					Scope: config.AuthOpenIDScope.GetString(),
+				},
 			},
 		},
 	}
-
-	providers, err := openid.GetAllProviders()
-	if err != nil {
-		log.Errorf("Error while getting openid providers for /info: %s", err)
-		// No return here to not break /info
-	}
-
-	info.AuthInfo.OpenIDConnect.Providers = providers
 
 	// Migrators
 	if config.MigrationTodoistEnable.GetBool() {

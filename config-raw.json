@@ -607,7 +607,7 @@
                                 {
                                     "key": "applicationid",
                                     "default_value": "",
-                                    "comment": "The unsplash application id is only used for pingback and required as per their api guidelines.\nYou can find the Application ID in the dashboard for your API application. It should be a numeric ID.\nIt will only show in the UI if your application has been approved for Enterprise usage, therefore if\nyou’re in Demo mode, you can also find the ID in the URL at the end: https://unsplash.com/oauth/applications/:application_id"
+                                    "comment": "The unsplash application id is only used for pingback and required as per their api guidelines.\nYou can find the Application ID in the dashboard for your API application. It should be a numeric ID.\nIt will only show in the UI if your application has been approved for Enterprise usage, therefore if\nyou're in Demo mode, you can also find the ID in the URL at the end: https://unsplash.com/oauth/applications/:application_id"
                                 }
                             ]
                         }
@@ -656,7 +656,7 @@
                 },
                 {
                     "key": "openid",
-                    "comment": "OpenID configuration will allow users to authenticate through a third-party OpenID Connect compatible provider.\u003cbr/\u003e\nThe provider needs to support the `openid`, `profile` and `email` scopes.\u003cbr/\u003e\n**Note:** Some openid providers (like Gitlab) only make the email of the user available through OpenID if they have set it to be publicly visible.\nIf the email is not public in those cases, authenticating will fail.\u003cbr/\u003e\n**Note 2:** The frontend expects the third party to redirect the user \u003cfrontend-url\u003e/auth/openid/\u003cauth key\u003e after authentication. Please make sure to configure the redirect url in your third party auth service accordingly if you're using the default Vikunja frontend.\nThe frontend will automatically provide the API with the redirect url, composed from the current url where it's hosted.\nIf you want to use the desktop client with OpenID, make sure to allow redirects to `127.0.0.1`.",
+                    "comment": "OpenID configuration will allow users to authenticate through a third-party OpenID Connect compatible provider.\u003cbr/\u003e\nThe provider needs to support the `openid`, `profile` and `email` scopes.\u003cbr/\u003e\n**Note:** Some openid providers (like Gitlab) only make the email of the user available through OpenID if they have set it to be publicly visible.\nIf the email is not public in those cases, authenticating will fail.\u003cbr/\u003e\n**Note 2:** The frontend expects the third party to redirect the user \u003cfrontend-url\u003e/auth/openid/default after authentication. Please make sure to configure the redirect url in your third party auth service accordingly if you're using the default Vikunja frontend.\nThe frontend will automatically provide the API with the redirect url, composed from the current url where it's hosted.\nIf you want to use the desktop client with OpenID, make sure to allow redirects to `127.0.0.1`.",
                     "children": [
                         {
                             "key": "enabled",
@@ -664,60 +664,49 @@
                             "comment": "Enable or disable OpenID Connect authentication"
                         },
                         {
-                            "key": "providers",
-                            "comment": "A list of enabled providers. You can freely choose the `<provider key>`. Note that you must add at least one key to a config file if you want to read values from an environment variable as the provider won't be known to Vikunja otherwise.",
-                            "children": [
-                                {
-                                    "key": "<provider key>",
-                                    "children": [
-                                        {
-                                            "key": "name",
-                                            "default_value": "",
-                                            "comment": "The name of the provider as it will appear in the frontend."
-                                        },
-                                        {
-                                            "key": "authurl",
-                                            "default_value": "",
-                                            "comment": "The auth url to send users to if they want to authenticate using OpenID Connect."
-                                        },
-                                        {
-                                            "key": "logouturl",
-                                            "default_value": "",
-                                            "comment": "The oidc logouturl that users will be redirected to on logout.\nLeave empty or delete key, if you do not want to be redirected."
-                                        },
-                                        {
-                                            "key": "clientid",
-                                            "default_value": "",
-                                            "comment": "The client ID used to authenticate Vikunja at the OpenID Connect provider."
-                                        },
-                                        {
-                                            "key": "clientsecret",
-                                            "default_value": "",
-                                            "comment": "The client secret used to authenticate Vikunja at the OpenID Connect provider."
-                                        },
-                                        {
-                                            "key": "scope",
-                                            "default_value": "openid email profile",
-                                            "comment": "The scope necessary to use oidc.\nIf you want to use the Feature to create and assign to Vikunja teams via oidc, you have to add the custom \"vikunja_scope\" and check [openid.md](https://vikunja.io/docs/openid/).\ne.g. scope: openid email profile vikunja_scope"
-                                        },
-                                        {
-                                            "key": "usernamefallback",
-                                            "default_value": "false",
-                                            "comment": "This option allows to look for a local account where the OIDC Issuer match the Vikunja local username. Allowed value is either `true` or `false`. That option can be combined with `emailfallback`.\nUse with caution, this can allow the 3rd party provider to connect to *any* local account and therefore potential account hijaking."
-                                        },
-                                        {
-                                            "key": "emailfallback",
-                                            "default_value": "false",
-                                            "comment": "This option allows to look for a local account where the OIDC user's email match the Vikunja local email. Allowed value is either `true` or `false`. That option can be combined with `usernamefallback`.\nUse with caution, this can allow the 3rd party provider to connect to *any* local account and therefore potential account hijaking."
-                                        },
-                                        {
-                                            "key": "forceuserinfo",
-                                            "default_value": "false",
-                                            "comment": "This option forces the use of the OpenID Connect UserInfo endpoint to retrieve user information instead of relying on claims from the ID token. When set to `true`, user data (email, name, username) will always be obtained from the UserInfo endpoint even if the information is available in the token claims. This is useful for providers that don't include complete user information in their tokens or when you need the most up-to-date user data. Allowed value is either `true` or `false`."
-                                        }
-                                    ]
-                                }
-                            ]
+                            "key": "name",
+                            "default_value": "",
+                            "comment": "The name of the provider as it will appear in the frontend."
+                        },
+                        {
+                            "key": "authurl",
+                            "default_value": "",
+                            "comment": "The auth url to send users to if they want to authenticate using OpenID Connect."
+                        },
+                        {
+                            "key": "logouturl",
+                            "default_value": "",
+                            "comment": "The oidc logouturl that users will be redirected to on logout.\nLeave empty or delete key, if you do not want to be redirected."
+                        },
+                        {
+                            "key": "clientid",
+                            "default_value": "",
+                            "comment": "The client ID used to authenticate Vikunja at the OpenID Connect provider."
+                        },
+                        {
+                            "key": "clientsecret",
+                            "default_value": "",
+                            "comment": "The client secret used to authenticate Vikunja at the OpenID Connect provider."
+                        },
+                        {
+                            "key": "scope",
+                            "default_value": "openid email profile",
+                            "comment": "The scope necessary to use oidc.\nIf you want to use the Feature to create and assign to Vikunja teams via oidc, you have to add the custom \"vikunja_scope\" and check [openid.md](https://vikunja.io/docs/openid/).\ne.g. scope: openid email profile vikunja_scope"
+                        },
+                        {
+                            "key": "usernamefallback",
+                            "default_value": "false",
+                            "comment": "This option allows to look for a local account where the OIDC Issuer match the Vikunja local username. Allowed value is either `true` or `false`. That option can be combined with `emailfallback`.\nUse with caution, this can allow the 3rd party provider to connect to *any* local account and therefore potential account hijaking."
+                        },
+                        {
+                            "key": "emailfallback",
+                            "default_value": "false",
+                            "comment": "This option allows to look for a local account where the OIDC Issuer match the Vikunja local email. Allowed value is either `true` or `false`. That option can be combined with `usernamefallback`.\nUse with caution, this can allow the 3rd party provider to connect to *any* local account and therefore potential account hijaking."
+                        },
+                        {
+                            "key": "forceuserinfo",
+                            "default_value": "false",
+                            "comment": "Force the use of the userinfo endpoint to get user information. This is useful if the ID token does not contain all required information."
                         }
                     ]
                 },

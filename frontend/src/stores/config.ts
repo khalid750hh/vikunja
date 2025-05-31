@@ -37,8 +37,13 @@ export interface ConfigState {
 		},
 		openidConnect: {
 			enabled: boolean,
-			redirectUrl: string,
-			providers: IProvider[],
+			provider: {
+				name: string,
+				authUrl: string,
+				logoutUrl: string,
+				clientId: string,
+				scope: string,
+			},
 		},
 	},
 	publicTeamsEnabled: boolean,
@@ -74,8 +79,13 @@ export const useConfigStore = defineStore('config', () => {
 			},
 			openidConnect: {
 				enabled: false,
-				redirectUrl: '',
-				providers: [],
+				provider: {
+					name: '',
+					authUrl: '',
+					logoutUrl: '',
+					clientId: '',
+					scope: '',
+				},
 			},
 		},
 		publicTeamsEnabled: false,
