@@ -37,39 +37,50 @@ func GetAllProviders() (providers []*Provider, err error) {
 	providers = []*Provider{}
 	exists, err := keyvalue.GetWithValue("openid_providers", &providers)
 	if !exists {
-		provider := &Provider{
-			Name:             config.AuthOpenIDName.GetString(),
-			Key:              "default",
-			AuthURL:          config.AuthOpenIDAuthURL.GetString(),
-			OriginalAuthURL:  config.AuthOpenIDAuthURL.GetString(),
-			LogoutURL:        config.AuthOpenIDLogoutURL.GetString(),
-			ClientID:         config.AuthOpenIDClientID.GetString(),
-			ClientSecret:     config.AuthOpenIDClientSecret.GetString(),
-			Scope:            config.AuthOpenIDScope.GetString(),
-			EmailFallback:    config.AuthOpenIDEmailFallback.GetBool(),
-			UsernameFallback: config.AuthOpenIDUsernameFallback.GetBool(),
-			ForceUserInfo:    config.AuthOpenIDForceUserInfo.GetBool(),
+		rawProviders := config.AuthOpenIDProviders.Get()
+		if rawProviders == nil {
+			return nil, nil
 		}
 
-		if provider.Scope == "" {
-			provider.Scope = "openid profile email"
+		rawProvider, is := rawProviders.(map[string]interface{})
+		if !is {
+			log.Criticalf("It looks like your openid configuration is in the wrong format. Please check the docs for the correct format.")
+			return
 		}
 
-		err = provider.setOicdProvider()
-		if err != nil {
-			return nil, err
+		for key, p := range rawProvider {
+			var pi map[string]interface{}
+			var is bool
+			pi, is = p.(map[string]interface{})
+			// JSON config is a map[string]interface{}, other providers are not. Under the hood they are all strings so
+			// it is safe to cast.
+			if !is {
+				pis := p.(map[interface{}]interface{})
+				pi = make(map[string]interface{}, len(pis))
+				for i, s := range pis {
+					pi[i.(string)] = s
+				}
+			}
+
+			provider, err := getProviderFromMap(pi, key)
+
+			if err != nil {
+				log.Errorf("Error while getting openid provider %s: %s", key, err)
+				continue
+			}
+
+			if provider == nil {
+				log.Errorf("Could not openid provider %s, please check your config", key)
+				continue
+			}
+
+			providers = append(providers, provider)
+
+			err = keyvalue.Put("openid_provider_"+key, provider)
+			if err != nil {
+				return nil, err
+			}
 		}
-
-		provider.Oauth2Config = &oauth2.Config{
-			ClientID:     provider.ClientID,
-			ClientSecret: provider.ClientSecret,
-			Endpoint:     provider.openIDProvider.Endpoint(),
-			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		}
-
-		provider.AuthURL = provider.Oauth2Config.Endpoint.AuthURL
-
-		providers = append(providers, provider)
 		err = keyvalue.Put("openid_providers", providers)
 	}
 
@@ -78,14 +89,25 @@ func GetAllProviders() (providers []*Provider, err error) {
 
 // GetProvider retrieves a provider from keyvalue
 func GetProvider(key string) (provider *Provider, err error) {
-	providers, err := GetAllProviders()
+	provider = &Provider{}
+	exists, err := keyvalue.GetWithValue("openid_provider_"+key, provider)
 	if err != nil {
 		return nil, err
 	}
-	if len(providers) == 0 {
-		return nil, nil
+	if !exists {
+		_, err = GetAllProviders() // This will put all providers in cache
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = keyvalue.GetWithValue("openid_provider_"+key, provider)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return providers[0], nil
+
+	err = provider.setOicdProvider()
+	return
 }
 
 func getProviderFromMap(pi map[string]interface{}, key string) (provider *Provider, err error) {

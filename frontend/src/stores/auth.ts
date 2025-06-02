@@ -24,21 +24,29 @@ import {PrefixMode} from '@/modules/parseTaskText'
 import type {IProvider} from '@/types/IProvider'
 
 function redirectToSpecifiedProvider() {
+
 	const {auth} = useConfigStore()
 	const searchParams = new URLSearchParams(window.location.search)
 	if (searchParams.has('redirectToProvider')) {
+
 		const redirectToProviderValue = searchParams.get('redirectToProvider')
 
 		if (
-			auth.openidConnect.enabled
+			auth.openidConnect.providers?.length === 1
 			&& (window.location.pathname.startsWith('/login') || window.location.pathname === '/') // Kinda hacky, but prevents an endless loop.
 			&& (redirectToProviderValue === null
 				|| redirectToProviderValue === 'true'
-				|| redirectToProviderValue === '1'
-				|| redirectToProviderValue === 'default')
-		) {
-			redirectToProvider()
+				|| redirectToProviderValue === '1')
+ 		) {
+			redirectToProvider(auth.openidConnect.providers[0])
 		}
+
+		// let's try to find the provider to logon to !
+		const wantedProvider = auth.openidConnect.providers?.find(p => p.key === redirectToProviderValue)
+		if (wantedProvider) {
+			redirectToProvider(wantedProvider)
+		}
+		console.warn(`Could not find provider to redirect to.\nWanted: ${wantedProvider}\nAvailable: ${auth.openidConnect.providers?.map(p => p.key)}`)
 	}
 }
 
@@ -218,20 +226,28 @@ export const useAuthStore = defineStore('auth', () => {
 		}
 	}
 
-	async function openIdAuth({code}) {
+	async function openIdAuth({provider, code}) {
 		const HTTP = HTTPFactory()
 		setIsLoading(true)
+		setLoggedInVia(null)
 
+		const fullProvider: IProvider = configStore.auth.openidConnect.providers.find((p: IProvider) => p.key === provider)
+
+		const data = {
+			code: code,
+			redirect_url: getRedirectUrlFromCurrentFrontendPath(fullProvider),
+		}
+
+		// Delete an eventually preexisting old token
+		removeToken()
 		try {
-			const data = {
-				code,
-			}
-
-			const response = await HTTP.post('/auth/openid/default/callback', data)
+			const response = await HTTP.post(`/auth/openid/${provider}/callback`, data)
+			// Save the token to local storage for later use
 			saveToken(response.data.token, true)
+			setLoggedInVia(provider)
+
+			// Tell others the user is autheticated
 			await checkAuth()
-		} catch (e) {
-			throw e
 		} finally {
 			setIsLoading(false)
 		}
@@ -422,8 +438,9 @@ export const useAuthStore = defineStore('auth', () => {
 		await checkAuth()
 
 		// if configured, redirect to OIDC Provider on logout
-		if (loggedInVia === 'default' && configStore.auth.openidConnect.enabled) {
-			redirectToProviderOnLogout()
+		const fullProvider: IProvider|undefined = configStore.auth.openidConnect.providers?.find((p: IProvider) => p.key === loggedInVia)
+		if (fullProvider) {
+			redirectToProviderOnLogout(fullProvider)
 		}
 	}
 

@@ -257,7 +257,7 @@ func registerAPIRoutes(a *echo.Group) {
 	}
 
 	if config.AuthOpenIDEnabled.GetBool() {
-		ur.POST("/auth/openid/default/callback", openid.HandleCallback)
+		ur.POST("/auth/openid/:provider/callback", openid.HandleCallback)
 	}
 
 	// Testing

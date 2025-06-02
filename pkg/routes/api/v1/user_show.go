@@ -102,21 +102,20 @@ func getAuthProviderName(u *user.User) (name string, err error) {
 		return "ldap", nil
 	}
 
-	provider, err := openid.GetProvider("default")
+	providers, err := openid.GetAllProviders()
 	if err != nil {
 		return "", err
 	}
-	if provider == nil {
-		return "", nil
+
+	for _, provider := range providers {
+		issuerURL, err := provider.Issuer()
+		if err != nil {
+			return "", err
+		}
+		if issuerURL == u.Issuer {
+			return provider.Name, nil
+		}
 	}
 
-	issuerURL, err := provider.Issuer()
-	if err != nil {
-		return "", err
-	}
-	if issuerURL == u.Issuer {
-		return provider.Name, nil
-	}
-
-	return "", nil
+	return
 }

@@ -74,15 +74,7 @@ const (
 
 	AuthLocalEnabled    Key = `auth.local.enabled`
 	AuthOpenIDEnabled   Key = `auth.openid.enabled`
-	AuthOpenIDName      Key = `auth.openid.name`
-	AuthOpenIDAuthURL   Key = `auth.openid.authurl`
-	AuthOpenIDLogoutURL Key = `auth.openid.logouturl`
-	AuthOpenIDClientID  Key = `auth.openid.clientid`
-	AuthOpenIDClientSecret Key = `auth.openid.clientsecret`
-	AuthOpenIDScope     Key = `auth.openid.scope`
-	AuthOpenIDEmailFallback Key = `auth.openid.emailfallback`
-	AuthOpenIDUsernameFallback Key = `auth.openid.usernamefallback`
-	AuthOpenIDForceUserInfo Key = `auth.openid.forceuserinfo`
+	AuthOpenIDProviders Key = `auth.openid.providers`
 
 	AuthLdapEnabled    Key = `auth.ldap.enabled`
 	AuthLdapHost       Key = `auth.ldap.host`
@@ -482,6 +474,10 @@ func GetConfigValueFromFile(configKey string) string {
 func readConfigValuesFromFiles() {
 	keys := viper.AllKeys()
 	for _, key := range keys {
+		if strings.Contains(key, "auth.openid.providers") {
+			// Setting openid provider values will remove everything but the value from file
+			continue
+		}
 		// Env is evaluated manually at runtime, so we need to check this for each key
 		value := GetConfigValueFromFile(key)
 		if value != "" {

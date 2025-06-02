@@ -133,11 +133,13 @@
 			class="mt-4"
 		>
 			<XButton
+				v-for="(p, k) in openidConnect.providers"
+				:key="k"
 				variant="secondary"
 				class="is-fullwidth mt-2"
-				@click="redirectToProvider()"
+				@click="redirectToProvider(p)"
 			>
-				{{ $t('user.auth.loginWith', {provider: openidConnect.name}) }}
+				{{ $t('user.auth.loginWith', {provider: p.name}) }}
 			</XButton>
 		</div>
 	</div>
@@ -172,7 +174,7 @@ const localAuthEnabled = computed(() => configStore.auth.local.enabled)
 const ldapAuthEnabled = computed(() => configStore.auth.ldap.enabled)
 
 const openidConnect = computed(() => configStore.auth.openidConnect)
-const hasOpenIdProviders = computed(() => openidConnect.value.enabled)
+const hasOpenIdProviders = computed(() => openidConnect.value.enabled && openidConnect.value.providers?.length > 0)
 
 const isLoading = computed(() => authStore.isLoading)
 

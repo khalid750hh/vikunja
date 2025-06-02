@@ -108,10 +108,12 @@ func (p *Provider) Issuer() (issuerURL string, err error) {
 // @Produce json
 // @Security JWTKeyAuth
 // @Param callback body openid.Callback true "The openid callback"
+// @Param provider path int true "The OpenID Connect provider key as returned by the /info endpoint"
 // @Success 200 {object} auth.Token
 // @Failure 500 {object} models.Message "Internal error"
-// @Router /auth/openid/default/callback [post]
+// @Router /auth/openid/{provider}/callback [post]
 func HandleCallback(c echo.Context) error {
+
 	provider, oauthToken, idToken, err := getProviderAndOidcTokens(c)
 	if err != nil {
 		var detailedErr *models.ErrOpenIDBadRequestWithDetails
@@ -349,13 +351,15 @@ func getClaims(provider *Provider, oauth2Token *oauth2.Token, idToken *oidc.IDTo
 }
 
 func getProviderAndOidcTokens(c echo.Context) (*Provider, *oauth2.Token, *oidc.IDToken, error) {
+
 	cb := &Callback{}
 	if err := c.Bind(cb); err != nil {
 		return nil, nil, nil, &models.ErrOpenIDBadRequest{Message: "Bad data"}
 	}
 
-	// Get the default provider
-	provider, err := GetProvider("default")
+	// Check if the provider exists
+	providerKey := c.Param("provider")
+	provider, err := GetProvider(providerKey)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -371,6 +375,7 @@ func getProviderAndOidcTokens(c echo.Context) (*Provider, *oauth2.Token, *oidc.I
 	if err != nil {
 		var rerr *oauth2.RetrieveError
 		if errors.As(err, &rerr) {
+
 			details := make(map[string]interface{})
 			if err := json.Unmarshal(rerr.Body, &details); err != nil {
 				log.Errorf("Error unmarshalling token for provider %s: %v", provider.Name, err)

@@ -377,7 +377,7 @@ const router = createRouter({
 			},
 		},
 		{
-			path: '/auth/openid/default',
+			path: '/auth/openid/:provider',
 			name: 'openid.auth',
 			component: OpenIdAuth,
 		},
